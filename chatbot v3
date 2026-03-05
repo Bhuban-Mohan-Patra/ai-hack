@@ -1,0 +1,115 @@
+// User sends message
+// ↓
+// Input disabled
+// ↓
+// AI response comes
+// ↓
+// Input enabled again
+
+
+
+import { useState, useRef, useEffect } from "react"
+import "./App.css"
+
+function App() {
+
+  type Message = {
+    role: "user" | "ai"
+    text: string
+  }
+
+  const [messages, setMessages] = useState<Message[]>([])
+  const [input, setInput] = useState("")
+  const [isTyping, setIsTyping] = useState(false)
+
+  const chatRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight
+    }
+  }, [messages])
+
+
+  const handleSend = () => {
+  if (!input) return
+
+  const userMessage: Message = {
+    role: "user",
+    text: input
+  }
+
+  setMessages([...messages, userMessage])
+  setInput("")
+
+  
+  setIsTyping(true)
+
+  
+  setTimeout(() => {
+
+    const aiMessage: Message = {
+      role: "ai",
+      text: "AI response..."
+    }
+
+    setMessages(prev => [...prev, aiMessage])
+
+    setIsTyping(false)
+
+  }, 1500)
+  }
+
+  return (
+    <div className="body">
+      <div className="container">
+
+        <h1>AI Assistant</h1>
+
+        <div className="msgBox" ref={chatRef}>
+
+  {messages.map((msg,index)=>(
+    <div
+      key={index}
+      className={msg.role === "user" ? "user" : "ai"}
+    >
+      {msg.text}
+    </div>
+  ))}
+
+  {isTyping && (
+    <div className="ai">
+      AI is typing...
+    </div>
+  )}
+
+</div>
+
+        <div className="inputArea">
+
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSend()
+              }
+            }}
+
+            placeholder="Type message..."
+            disabled={isTyping}
+          />
+
+          <button onClick={handleSend} disabled={isTyping}>
+            {isTyping ? "Thinking..." : "Send"}
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
+export default App
